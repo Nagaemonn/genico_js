@@ -50,7 +50,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=ubuntu  # ←適宜ユーザー名に変更！！！！
+User=ubuntu  # ←適宜ユーザー名に変更！！！！(コメントは最後消すこと)
 WorkingDirectory=/home/ubuntu/genico  # ←パスを修正
 ExecStart=/home/ubuntu/genico/venv/bin/python server.py 23479 # ←ここもパスを修正
 Restart=always
@@ -71,7 +71,6 @@ sudo systemctl start genico
 
 ```bash
 sudo systemctl status genico
-journalctl -u genico -f
 ```
 
 ---
