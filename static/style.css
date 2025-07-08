@@ -20,6 +20,9 @@ h2 {
   margin-bottom: 1.2rem;
   font-size: 1.7rem;
   letter-spacing: 0.03em;
+  max-width: 100%;
+  word-break: keep-all;
+  white-space: nowrap;
 }
 form {
   margin-bottom: 1.2rem;
