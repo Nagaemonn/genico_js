@@ -13,7 +13,6 @@ if len(sys.argv) > 1:
         print('Usage: python server.py [PORT]')
         sys.exit(1)
 TEMPLATE_DIR = 'templates'
-STATIC_DIR = 'static'
 
 def render_template(name, context=None):
     path = os.path.join(TEMPLATE_DIR, name)
@@ -52,7 +51,7 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
             self.wfile.write(render_template('index.html'))
-        elif self.path.startswith('/static/'):
+        elif self.path.startswith('/templates/'):
             file_path = self.path.lstrip('/')
             if os.path.exists(file_path):
                 self.send_response(200)
