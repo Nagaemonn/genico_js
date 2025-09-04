@@ -51,6 +51,15 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'text/html; charset=utf-8')
             self.end_headers()
             self.wfile.write(render_template('index.html'))
+        elif self.path == '/favicon.ico':
+            if os.path.exists('favicon.ico'):
+                self.send_response(200)
+                self.send_header('Content-type', 'image/x-icon')
+                self.end_headers()
+                with open('favicon.ico', 'rb') as f:
+                    self.wfile.write(f.read())
+            else:
+                self.send_error(404, 'Favicon Not Found')
         elif self.path.startswith('/templates/'):
             file_path = self.path.lstrip('/')
             if os.path.exists(file_path):
