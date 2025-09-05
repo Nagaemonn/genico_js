@@ -2,6 +2,7 @@ import http.server
 import socketserver
 import os
 import sys
+import urllib.parse
 from io import BytesIO
 from PIL import Image
 
@@ -36,7 +37,14 @@ def parse_multipart(headers, rfile):
             header, filedata = part.split(b'\r\n\r\n', 1)
             for line in header.split(b'\r\n'):
                 if b'filename=' in line:
-                    filename = line.split(b'filename=')[1].strip().strip(b'"').decode(errors='ignore')
+                    try:
+                        filename = line.split(b'filename=')[1].strip().strip(b'"').decode('utf-8')
+                    except UnicodeDecodeError:
+                        # UTF-8でデコードできない場合は、latin-1でデコードしてからUTF-8に変換を試行
+                        try:
+                            filename = line.split(b'filename=')[1].strip().strip(b'"').decode('latin-1').encode('latin-1').decode('utf-8')
+                        except (UnicodeDecodeError, UnicodeEncodeError):
+                            filename = 'uploaded.png'
                     break
             else:
                 filename = 'uploaded.png'
@@ -102,9 +110,11 @@ class SimpleHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     im.save(ico_data, format='ICO', sizes=sizes)
                     ico_data.seek(0)
                     ico_name = os.path.splitext(filename)[0] + '.ico'
+                    # URLエンコードして日本語ファイル名を安全に処理
+                    encoded_ico_name = urllib.parse.quote(ico_name.encode('utf-8'))
                     self.send_response(200)
                     self.send_header('Content-type', 'image/x-icon')
-                    self.send_header('Content-Disposition', f'attachment; filename="{ico_name}"')
+                    self.send_header('Content-Disposition', f'attachment; filename*=UTF-8\'\'{encoded_ico_name}')
                     self.end_headers()
                     self.wfile.write(ico_data.getvalue())
             except Exception as e:
