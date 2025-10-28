@@ -3,26 +3,38 @@
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>PNG to ICO Converter</title>
-  <link rel='icon' type='image/x-icon' href='./favicon.ico'>
-  <link rel='stylesheet' href='./templates/style.css'>
+  <title>Genico - PNG to ICO Converter</title>
+  <link rel='stylesheet' href='style.css'>
 </head>
 <body>
   <div class='container'>
-    <h2><span style="white-space:nowrap;">PNG → ICO</span> 変換サービス</h2>
+    <h2><span style="white-space:nowrap;">PNG → ICO</span> 変換アプリ</h2>
     <div style="color:#6366f1; font-size:1em; margin-bottom:1em; text-align:left;">
       <b>推奨フォーマット：</b><br>
       ・PNG形式<br>
       ・正方形（1:1）<br>
       ・256px × 256px 以上<br>
     </div>
-    <form enctype='multipart/form-data' method='post'>
-      <input name='file' type='file' accept='.png' required/><br><br>
-      <input type='submit' value='.ico ファイルをダウンロード'/>
-    </form>
+    
+    <div id="file-selection">
+      <button id="select-file-btn" class="file-btn">
+        📁 PNGファイルを選択
+      </button>
+      <div id="selected-file" class="selected-file" style="display: none;">
+        <span id="file-name"></span>
+        <button id="convert-btn" class="convert-btn" style="display: none;">
+          🔄 ICOに変換
+        </button>
+      </div>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+    
     <div class='footer'>
-      &copy; 2025 PNG to ICO Web<br>by Nagaemonn
+      &copy; 2025 Genico Desktop App<br>by Nagaemonn
     </div>
   </div>
+
+  <script src='renderer.js'></script>
 </body>
 </html> 

@@ -1,6 +1,6 @@
-# PNG to ICO Webサービス (TypeScript版)
+# Genico - PNG to ICO Desktop App (Electron版)
 
-このリポジトリは、PNG画像をWindows用ICOファイルに変換するWebサービスです。Python版からTypeScriptに変換されました。
+このリポジトリは、PNG画像をWindows用ICOファイルに変換するデスクトップアプリケーションです。ElectronとTypeScriptで構築されています。
 
 ---
 
@@ -38,18 +38,41 @@ npm install
 npm run build
 ```
 
-### 5. サーバーの起動
+### 5. Electronアプリの起動
 
 ```bash
-# 開発モード（TypeScript直接実行）
+# Electronアプリを起動
+npm run electron
+
+# 開発モード（ファイル監視付き）
+npm run electron-dev
+
+# Webサーバーとして起動（従来の機能）
 npm run dev
-
-# 本番モード（ビルド済みJavaScript実行）
 npm start
-
-# ポート指定
-npm start 8080
 ```
+
+---
+
+## パッケージングと配布
+
+### デスクトップアプリのビルド
+
+```bash
+# 全プラットフォーム用にビルド
+npm run electron-build
+
+# 配布用パッケージのみ作成
+npm run electron-dist
+```
+
+### ビルド成果物
+
+- **macOS**: DMGファイル
+- **Windows**: NSISインストーラー
+- **Linux**: AppImageファイル
+
+ビルドされたファイルは `release/` ディレクトリに出力されます。
 
 ---
 
@@ -67,9 +90,15 @@ npm run build
 npm run watch
 ```
 
+### Electron開発モード
+
+```bash
+npm run electron-dev
+```
+
 ---
 
-## Dockerでの実行
+## Dockerでの実行（Webサーバー版）
 
 ```bash
 # Dockerfileを作成してコンテナ化
@@ -79,9 +108,22 @@ docker run -p 3000:3000 genico-js
 
 ---
 
-## systemdサービスとして登録する
+## Webサーバーとしての使用
 
-### 1. systemdサービスファイルの作成
+従来のWebサーバー機能も利用可能です：
+
+```bash
+# 開発モード（TypeScript直接実行）
+npm run dev
+
+# 本番モード（ビルド済みJavaScript実行）
+npm start
+
+# ポート指定
+npm start 8080
+```
+
+### systemdサービスとして登録する
 
 例: `/etc/systemd/system/genico-js.service`
 
@@ -102,17 +144,7 @@ Environment=NODE_ENV=production
 WantedBy=multi-user.target
 ```
 
-### 2. systemdサービスの有効化・起動
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable genico-js
-sudo systemctl start genico-js
-```
-
----
-
-## サービスへのアクセス
+### サービスへのアクセス
 
 - ブラウザで `http://localhost:3000` にアクセス
 - デフォルトポートは3000番
@@ -123,16 +155,25 @@ sudo systemctl start genico-js
 ## 技術仕様
 
 ### 使用技術
+- **Electron**: デスクトップアプリフレームワーク
 - **TypeScript**: 型安全なJavaScript開発
 - **Node.js**: サーバーサイド実行環境
 - **Sharp**: 高性能画像処理ライブラリ
-- **Formidable**: マルチパートフォーム解析
+- **Electron Builder**: アプリパッケージング
 
 ### 主な機能
 - PNG画像のICO形式への変換
-- 複数サイズ（256px, 128px, 48px, 32px, 16px）での生成
+- ネイティブファイル選択ダイアログ
+- ネイティブ保存ダイアログ
 - 画像バリデーション（PNG形式、正方形、最小サイズチェック）
 - エラーハンドリングとユーザーフレンドリーなメッセージ
+- クロスプラットフォーム対応（Windows、macOS、Linux）
+
+### アーキテクチャ
+- **メインプロセス**: Electronのメインプロセスでファイル操作と変換処理
+- **レンダラープロセス**: ユーザーインターフェース
+- **IPC通信**: 安全なプロセス間通信
+- **Preloadスクリプト**: セキュアなAPI公開
 
 ### 型安全性
 - 完全なTypeScript型定義
@@ -144,8 +185,14 @@ sudo systemctl start genico-js
 ## 注意事項
 - Node.js 18以上が必要
 - PNG形式・正方形・256px以上の画像を推奨
-- 生成されたicoファイルはサーバーに保存されません
 - Sharpライブラリはネイティブバイナリを含むため、初回インストールに時間がかかる場合があります
+- Electronアプリは従来のWebサーバー機能も併用可能
+
+---
+
+## ライセンス
+
+MIT License
 
 ---
 

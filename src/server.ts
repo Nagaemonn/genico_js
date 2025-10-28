@@ -4,7 +4,7 @@ import * as path from 'path';
 // URL API is now built-in, no need to import
 import { IncomingMessage, ServerResponse } from 'http';
 import formidable from 'formidable';
-import sharp from 'sharp';
+import { Jimp } from 'jimp';
 
 /**
  * Configuration interface for the server
@@ -149,20 +149,20 @@ class GenicoServer {
         };
       }
 
-      const metadata = await sharp(imageBuffer).metadata();
+      const image = await Jimp.read(imageBuffer);
       
       // Check if it's PNG format
-      if (!filename.toLowerCase().endsWith('.png') || metadata.format !== 'png') {
+      if (!filename.toLowerCase().endsWith('.png') || image.mime !== 'image/png') {
         warnings.push('PNGファイルのみ対応しています。');
       }
 
       // Check if image is square
-      if (metadata.width !== metadata.height) {
+      if (image.width !== image.height) {
         warnings.push('画像は正方形（1:1）でアップロードしてください。');
       }
 
       // Check minimum size
-      if ((metadata.width || 0) < 256 || (metadata.height || 0) < 256) {
+      if (image.width < 256 || image.height < 256) {
         warnings.push('画像サイズは256px以上を推奨します。');
       }
 
@@ -188,18 +188,15 @@ class GenicoServer {
    */
   private async convertToIco(imageBuffer: Buffer, filename: string): Promise<Buffer> {
     try {
-      // Create ICO with multiple sizes
-      const sizes = [256, 128, 48, 32, 16];
+      // Read and process the image with Jimp
+      const image = await Jimp.read(imageBuffer);
       
-      // Convert to PNG first to ensure proper format
-      const pngBuffer = await sharp(imageBuffer)
-        .png()
-        .resize(256, 256, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .toBuffer();
+      // Resize to 256x256 and convert to PNG
+      // Note: Jimp doesn't directly support ICO output, so we'll create a PNG
+      // that can be used as an ICO (many systems accept PNG as ICO)
+      const resizedImage = image.resize({ w: 256, h: 256 });
+      const pngBuffer = await resizedImage.getBuffer('image/png');
 
-      // For now, we'll create a simple ICO by converting the PNG
-      // Note: Sharp doesn't directly support ICO output, so we'll use PNG as fallback
-      // In a production environment, you might want to use a dedicated ICO library
       return pngBuffer;
     } catch (error) {
       throw new Error(`ICO変換に失敗しました: ${error}`);
