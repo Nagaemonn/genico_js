@@ -1,38 +1,80 @@
-# PNG to ICO Webサービス
+# PNG to ICO Webサービス (TypeScript版)
 
-このリポジトリは、PNG画像をWindows用ICOファイルに変換するWebサービスです。
+このリポジトリは、PNG画像をWindows用ICOファイルに変換するWebサービスです。Python版からTypeScriptに変換されました。
 
 ---
 
-## Ubuntu Serverでのセットアップ手順
+## セットアップ手順
 
 ### 1. リポジトリのクローン
 
 ```bash
 # 任意のディレクトリで
-git clone git@github.com:Nagaemonn/genico.git
-cd genico
+git clone <repository-url>
+cd genico_js
 ```
 
-### 2. Python仮想環境(venv)の作成
+### 2. Node.jsのインストール
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+# Node.js 18以上をインストール
+# macOS (Homebrew)
+brew install node
+
+# Ubuntu/Debian
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
 ```
 
 ### 3. 依存パッケージのインストール
 
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
-### 4. サーバーの起動（手動）
+### 4. TypeScriptのビルド
 
 ```bash
-python server.py
-# またはポート指定
-python server.py 8080
+npm run build
+```
+
+### 5. サーバーの起動
+
+```bash
+# 開発モード（TypeScript直接実行）
+npm run dev
+
+# 本番モード（ビルド済みJavaScript実行）
+npm start
+
+# ポート指定
+npm start 8080
+```
+
+---
+
+## 開発
+
+### TypeScriptの型チェック
+
+```bash
+npm run build
+```
+
+### ファイル監視モード
+
+```bash
+npm run watch
+```
+
+---
+
+## Dockerでの実行
+
+```bash
+# Dockerfileを作成してコンテナ化
+docker build -t genico-js .
+docker run -p 3000:3000 genico-js
 ```
 
 ---
@@ -41,19 +83,20 @@ python server.py 8080
 
 ### 1. systemdサービスファイルの作成
 
-例: `/etc/systemd/system/genico.service`
+例: `/etc/systemd/system/genico-js.service`
 
 ```ini
 [Unit]
-Description=PNG to ICO Web Service
+Description=PNG to ICO Web Service (TypeScript)
 After=network.target
 
 [Service]
 Type=simple
-User=ubuntu  # ←適宜ユーザー名に変更！！！！(コメントは最後消すこと)
-WorkingDirectory=/home/ubuntu/genico  # ←パスを修正
-ExecStart=/home/ubuntu/genico/venv/bin/python server.py 23479 # ←ここもパスを修正
+User=ubuntu
+WorkingDirectory=/path/to/genico_js
+ExecStart=/usr/bin/node dist/server.js 3000
 Restart=always
+Environment=NODE_ENV=production
 
 [Install]
 WantedBy=multi-user.target
@@ -63,29 +106,46 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable genico
-sudo systemctl start genico
-```
-
-### 3. ステータス確認・ログ確認
-
-```bash
-sudo systemctl status genico
+sudo systemctl enable genico-js
+sudo systemctl start genico-js
 ```
 
 ---
 
 ## サービスへのアクセス
 
-- ブラウザで `http://サーバーIP:23479` にアクセス
+- ブラウザで `http://localhost:3000` にアクセス
+- デフォルトポートは3000番
 - ファイアウォール等でポート開放も必要に応じて行ってください
 
 ---
 
+## 技術仕様
+
+### 使用技術
+- **TypeScript**: 型安全なJavaScript開発
+- **Node.js**: サーバーサイド実行環境
+- **Sharp**: 高性能画像処理ライブラリ
+- **Formidable**: マルチパートフォーム解析
+
+### 主な機能
+- PNG画像のICO形式への変換
+- 複数サイズ（256px, 128px, 48px, 32px, 16px）での生成
+- 画像バリデーション（PNG形式、正方形、最小サイズチェック）
+- エラーハンドリングとユーザーフレンドリーなメッセージ
+
+### 型安全性
+- 完全なTypeScript型定義
+- インターフェースベースの設計
+- コンパイル時エラーチェック
+
+---
+
 ## 注意事項
-- Pillow（PIL）以外は標準ライブラリのみで動作します
+- Node.js 18以上が必要
 - PNG形式・正方形・256px以上の画像を推奨
 - 生成されたicoファイルはサーバーに保存されません
+- Sharpライブラリはネイティブバイナリを含むため、初回インストールに時間がかかる場合があります
 
 ---
 
